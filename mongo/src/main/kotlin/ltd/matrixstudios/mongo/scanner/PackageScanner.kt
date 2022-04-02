@@ -17,13 +17,13 @@ object PackageScanner {
     }
 
     fun scanPackage(pckge: String) {
-        val classes = ClassUtil.findAllClasses(pckge)
+        val classes = ClassUtil.getClassesInPackage(pckge)
 
-        if (classes!!.isNotEmpty()) {
-            val filteredClasses = classes.filter { it!!.getDeclaredAnnotation(Collection::class.java) != null }
+        if (classes.isNotEmpty()) {
+            val filteredClasses = classes.filter { it.getDeclaredAnnotation(Collection::class.java) != null }
 
             filteredClasses.forEach {
-                annotations[it!!] = it.getDeclaredAnnotation(Collection::class.java).collectionName
+                annotations[it] = it.getDeclaredAnnotation(Collection::class.java).collectionName
             }
         }
     }

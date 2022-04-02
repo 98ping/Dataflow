@@ -79,7 +79,7 @@ class MongoDataFlow {
         if (mainSerializer != GsonSerializer) {
             return mainSerializer
         }
-        return mainSerializer
+        return GsonSerializer
     }
 
 

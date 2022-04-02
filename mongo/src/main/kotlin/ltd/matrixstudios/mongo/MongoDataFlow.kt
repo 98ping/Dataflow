@@ -1,21 +1,17 @@
 package ltd.matrixstudios.mongo
 
 import com.mongodb.MongoClient
-import com.mongodb.MongoClientOptions
 import com.mongodb.MongoClientURI
-import com.mongodb.ServerAddress
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.UpdateOptions
 import ltd.matrixstudios.mongo.annotation.Collection
+import ltd.matrixstudios.mongo.credientials.MongoPoolConnection
 import ltd.matrixstudios.mongo.query.Query
 import ltd.matrixstudios.mongo.serialization.Serialization
 import ltd.matrixstudios.mongo.serialization.impl.GsonSerializer
 import org.bson.Document
-import org.bson.codecs.configuration.CodecRegistries
-import org.bson.codecs.configuration.CodecRegistry
-import org.w3c.dom.DocumentType
 
 class MongoDataFlow {
 
@@ -34,11 +30,10 @@ class MongoDataFlow {
         }
     }
 
-    fun setClient(uri: String) : MongoDataFlow {
+    //if you use uri's suck it up and use individual credentials
+    fun setPool(pool: MongoPoolConnection) : MongoDataFlow {
         return this.apply {
-
-            this.mongoClient = MongoClient(MongoClientURI(uri))
-
+            this.mongoClient = pool.useClient()
         }
     }
 
@@ -77,9 +72,4 @@ class MongoDataFlow {
     fun <T> createQuery(clazz: Class<T>) : Query<T> {
         return Query(clazz)
     }
-
-
-
-
-
 }

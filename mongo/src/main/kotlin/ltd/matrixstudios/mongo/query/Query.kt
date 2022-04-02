@@ -1,6 +1,7 @@
 package ltd.matrixstudios.mongo.query
 
 import com.mongodb.client.FindIterable
+import com.mongodb.client.model.Filters
 import ltd.matrixstudios.mongo.MongoDataFlow
 import org.bson.Document
 

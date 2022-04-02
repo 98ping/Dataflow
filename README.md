@@ -6,3 +6,13 @@ All you have to do is simply just compile the destined jar that you want to mana
 
 This is how you initialize:
 
+`MongoDataFlow.of().setClient("uriString").setDatabase("targetDatabase")`
+
+This will allow you to then use all of the things that dataflow can do such as:
+
+- Setting custom serializers using the `setSerializer(serializer)`
+- Getting the collection of a class using `getCollection(Model.class)`
+- Saving any item to mongo by just using the model and it's class
+- Creating data queries
+- All annotation based so no manual registration or abstract classes are required!
+

@@ -22,10 +22,10 @@ object PackageScanner {
         val classes = ClassUtil.getClassesInPackage(pckge)
 
         if (classes.isNotEmpty()) {
-            val filteredClasses = classes.filter { it.getDeclaredAnnotation(Collection::class.java) != null }
+            val filteredClasses = classes.filter { it.getAnnotation(Collection::class.java) != null }
 
             filteredClasses.forEach {
-                annotations[it] = it.getDeclaredAnnotation(Collection::class.java).collectionName
+                annotations[it] = it.getAnnotation(Collection::class.java).collectionName
             }
         }
     }

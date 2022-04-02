@@ -19,10 +19,10 @@ object PackageScanner {
     }
 
     fun scanPackage(pckge: String) {
-        val classes = ClassUtil.getClassesInPackage(pckge)
+        val classes = ClassUtil.find(pckge)
 
         println(classes.toString())
-        if (classes.isNotEmpty()) {
+        if (classes!!.isNotEmpty()) {
             val filteredClasses = classes.filter { it.getAnnotation(Collection::class.java) != null }
 
             filteredClasses.forEach {

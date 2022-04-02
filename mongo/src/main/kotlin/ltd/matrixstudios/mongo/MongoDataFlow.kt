@@ -8,8 +8,8 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.UpdateOptions
+import ltd.matrixstudios.mongo.annotation.Collection
 import ltd.matrixstudios.mongo.query.Query
-import ltd.matrixstudios.mongo.scanner.PackageScanner
 import ltd.matrixstudios.mongo.serialization.Serialization
 import ltd.matrixstudios.mongo.serialization.impl.GsonSerializer
 import org.bson.Document
@@ -56,7 +56,7 @@ class MongoDataFlow {
     }
 
     fun <T> getCollection(owningClass: Class<T>) : MongoCollection<T> {
-        return mongoDatabase.getCollection(PackageScanner.get(owningClass), owningClass)
+        return mongoDatabase.getCollection(owningClass.getAnnotation(Collection::class.java).collectionName, owningClass)
     }
 
     fun <T> save(id: String, t: T, owningClass: Class<T>) {

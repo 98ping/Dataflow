@@ -21,12 +21,14 @@ object PackageScanner {
     fun scanPackage(pckge: String) {
         val classes = ClassUtil.getClassesInPackage(pckge)
 
+        println(classes.toString())
         if (classes.isNotEmpty()) {
             val filteredClasses = classes.filter { it.getAnnotation(Collection::class.java) != null }
 
             filteredClasses.forEach {
                 annotations[it] = it.getAnnotation(Collection::class.java).collectionName
             }
+            println("I reghisdterersrederefed")
         }
     }
 }

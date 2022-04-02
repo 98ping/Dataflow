@@ -1,68 +1,48 @@
 package ltd.matrixstudios.mongo.clazz
 
 
-import sun.net.www.protocol.file.FileURLConnection
 import java.io.File
-import java.net.JarURLConnection
-import java.net.URL
-import java.net.URLConnection
-import java.net.URLDecoder
-import java.util.jar.JarEntry
-import java.util.jar.JarInputStream
+import java.util.*
 
 
 object ClassUtil {
 
-    private fun checkDirectory(directory: File, packageName: String, classes: ArrayList<Class<*>>) {
-        var tmpDirectory: File
-        if (directory.exists() && directory.isDirectory) {
-            val files = directory.list()
-            if (files != null) {
-                for (file in files) {
-                    if (file.endsWith(".class")) {
-                        try {
-                            classes.add(Class.forName(packageName + '.' + file.substring(0, file.length - 6)))
-                        } catch (ignored: NoClassDefFoundError) {
-                        }
-                    } else if (File(directory, file).also { tmpDirectory = it }.isDirectory) {
-                        checkDirectory(tmpDirectory, "$packageName.$file", classes)
-                    }
-                }
-            }
+    private const val PKG_SEPARATOR = '.'
+
+    private const val DIR_SEPARATOR = '/'
+
+    private const val CLASS_FILE_SUFFIX = ".class"
+
+    private const val BAD_PACKAGE_ERROR =
+        "Unable to get resources from path '%s'. Are you sure the package '%s' exists?"
+
+    fun find(scannedPackage: String): List<Class<*>>? {
+        val scannedPath: String = scannedPackage.replace(PKG_SEPARATOR, DIR_SEPARATOR)
+        val scannedUrl = Thread.currentThread().contextClassLoader.getResource(scannedPath)
+            ?: throw IllegalArgumentException(java.lang.String.format(BAD_PACKAGE_ERROR, scannedPath, scannedPackage))
+        val scannedDir = File(scannedUrl.file)
+        val classes: MutableList<Class<*>> = ArrayList()
+        for (file in scannedDir.listFiles()) {
+            classes.addAll(find(file, scannedPackage)!!)
         }
+        return classes
     }
 
-    private fun checkJarFile(connection: JarURLConnection, packageName: String, classes: ArrayList<Class<*>>) {
-        val jarFile = connection.jarFile
-        val entries = jarFile.entries()
-        var name: String
-        var jarEntry: JarEntry? = null
-        while (entries.hasMoreElements() && entries.nextElement().also { jarEntry = it } != null) {
-            name = jarEntry!!.name
-            if (name.contains(".class")) {
-                name = name.substring(0, name.length - 6).replace('/', '.')
-                if (name.contains(packageName)) {
-                    classes.add(Class.forName(name))
-                }
+    private fun find(file: File, scannedPackage: String): List<Class<*>>? {
+        val classes: MutableList<Class<*>> = ArrayList()
+        val resource = scannedPackage + PKG_SEPARATOR.toString() + file.name
+        if (file.isDirectory) {
+            for (child in file.listFiles()) {
+                classes.addAll(find(child, resource)!!)
+            }
+        } else if (resource.endsWith(CLASS_FILE_SUFFIX)) {
+            val endIndex: Int = resource.length - CLASS_FILE_SUFFIX.length
+            val className = resource.substring(0, endIndex)
+            try {
+                classes.add(Class.forName(className))
+            } catch (ignore: ClassNotFoundException) {
             }
         }
-    }
-
-    fun getClassesInPackage(packageName: String): ArrayList<Class<*>> {
-        val classes = ArrayList<Class<*>>()
-        val cld = Thread.currentThread().contextClassLoader ?: throw ClassNotFoundException("Can't get class loader.")
-        val resources = cld.getResources(packageName.replace('.', '/'))
-        var connection: URLConnection
-        var url: URL? = null
-        while (resources.hasMoreElements() && resources.nextElement().also { url = it } != null) {
-            connection = url!!.openConnection()
-            if (connection is JarURLConnection) {
-                checkJarFile(connection, packageName, classes)
-            } else if (connection is FileURLConnection) {
-                checkDirectory(File(URLDecoder.decode(url!!.path, "UTF-8")), packageName, classes)
-            }
-        }
-
         return classes
     }
 }

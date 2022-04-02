@@ -34,7 +34,6 @@ class MongoDataFlow {
         }
     }
 
-
     fun setClient(uri: String) : MongoDataFlow {
         return this.apply {
 
@@ -55,32 +54,30 @@ class MongoDataFlow {
         }
     }
 
-    fun <T> getCollection(owningClass: Class<T>) : MongoCollection<T> {
-        return mongoDatabase.getCollection(owningClass.getAnnotation(Collection::class.java).collectionName, owningClass)
+    fun <T> getCollection(owningClass: Class<T>) : MongoCollection<Document> {
+        return mongoDatabase.getCollection(owningClass.getAnnotation(Collection::class.java).collectionName)
+    }
+
+    fun <T> delete(matchingId: String, owningClass: Class<T>) {
+        getCollection(owningClass).deleteOne(Filters.eq("_id", matchingId))
     }
 
     fun <T> save(id: String, t: T, owningClass: Class<T>) {
-        val document = Document.parse(getLocalSerializer().deserialize(t))
-
-        document.remove("_id")
-
-        val query = Document("_id", id)
-        val set = Document("\$set", document)
-
-        getCollection(owningClass).updateOne(query, set, UpdateOptions().upsert(true))
+        getCollection(owningClass).updateOne(
+            Filters.eq("_id", id),
+            Document(
+                "\$set",
+                Document.parse(
+                   mainSerializer.deserialize(t)
+                )
+            ),
+            UpdateOptions().upsert(true))
     }
 
     fun <T> createQuery(clazz: Class<T>) : Query<T> {
         return Query(clazz)
     }
 
-    //just a check to make sure the serializer is correct. you should use gson anyway
-    fun getLocalSerializer() : Serialization {
-        if (mainSerializer != GsonSerializer) {
-            return mainSerializer
-        }
-        return GsonSerializer
-    }
 
 
 

@@ -6,7 +6,7 @@ All you have to do is simply just compile the destined jar that you want to mana
 
 This is how you initialize:
 
-`MongoDataFlow.of().setClient("uriString").setDatabase("targetDatabase")`
+`MongoDataFlow.of().setClient(your MongoPoolConnection).setDatabase("targetDatabase")`
 
 This will allow you to then use all of the things that dataflow can do such as:
 
